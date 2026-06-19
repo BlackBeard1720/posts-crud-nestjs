@@ -16,6 +16,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
     context: ExecutionContext,
     next: CallHandler<T>,
   ): Observable<ApiResponse<T>> {
+    // Lấy request và response hiện tại từ HTTP context.
     const ctx = context.switchToHttp();
     const request = ctx.getRequest<Request>();
     const response = ctx.getResponse<Response>();
@@ -23,7 +24,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
     let message = 'Data retrieved successfully';
     const { method } = request;
 
-    // Đổi thông báo theo loại request.
+    // Đổi message thành công theo từng HTTP method.
     switch(method) {
       case 'POST':
         message = 'Created successfully';
@@ -38,6 +39,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
     }
 
     return next.handle().pipe(
+      // Bọc dữ liệu trả về thành format API thống nhất.
       map((data) => ({
         statusCode: response.statusCode,
         message: message,
