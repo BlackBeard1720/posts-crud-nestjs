@@ -1,4 +1,9 @@
-import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from '@nestjs/common';
+import {
+  CallHandler,
+  ExecutionContext,
+  Injectable,
+  NestInterceptor,
+} from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -11,7 +16,10 @@ export interface ApiResponse<T> {
 
 @Injectable()
 // Chuẩn hóa dữ liệu trả về cho mọi API trong app.
-export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T>> {
+export class TransformInterceptor<T> implements NestInterceptor<
+  T,
+  ApiResponse<T>
+> {
   intercept(
     context: ExecutionContext,
     next: CallHandler<T>,
@@ -25,7 +33,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, ApiResponse<T
     const { method } = request;
 
     // Đổi message thành công theo từng HTTP method.
-    switch(method) {
+    switch (method) {
       case 'POST':
         message = 'Created successfully';
         break;

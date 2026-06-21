@@ -36,7 +36,10 @@ export class PostsController {
 
   // Cập nhật bài viết theo id.
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() updatePostDto: UpdatePostDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updatePostDto: UpdatePostDto,
+  ) {
     return this.postsService.update(id, updatePostDto);
   }
 
