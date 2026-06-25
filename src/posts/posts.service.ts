@@ -1,48 +1,94 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Post } from './entities/post.entity';
+import { Repository, Brackets } from 'typeorm';
+import { QueryPostDto } from './dto/query-post.dto';
+import { PaginatedResult } from 'src/common/interfaces/paginated-result.interface';
 
 @Injectable()
 export class PostsService {
-  // Lưu dữ liệu bài viết tạm trong bộ nhớ.
-  private posts: { id: number; title: string; content: string }[] = [];
-  private idCount = 0;
-  create(createPostDto: CreatePostDto) {
-    // Tạo bài viết mới với id tự tăng.
-    const newPost = { id: ++this.idCount, ...createPostDto };
-    this.posts.push(newPost);
-    return newPost;
-  }
-  findAll() {
-    return this.posts;
+  constructor(
+    @InjectRepository(Post)
+    private readonly postsRepository: Repository<Post>,
+  ) {}
+
+  async findAll(query: QueryPostDto): Promise<PaginatedResult<Post>> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const skip = (page - 1) * limit;
+
+    const sortBy = query.sortBy ?? 'createdAt';
+    const sortOrder = query.sortOrder ?? 'DESC';
+
+    const qb = this.postsRepository.createQueryBuilder('post');
+
+    qb.where('1 = 1');
+
+    if (query.status) {
+      qb.andWhere('post.status = :status', {
+        status: query.status,
+      });
+    }
+
+    if (query.search) {
+      qb.andWhere(
+        new Brackets((qb) => {
+          qb.where('post.title LIKE :search', {
+            search: `%${query.search}%`,
+          }).orWhere('post.content LIKE :search', {
+            search: `%${query.search}%`,
+          });
+        }),
+      );
+    }
+
+    qb.orderBy(`post.${sortBy}`, sortOrder).skip(skip).take(limit);
+
+    const [posts, total] = await qb.getManyAndCount();
+
+    return {
+      items: posts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
-  findOne(id: number) {
-    // Tìm bài viết theo id và báo lỗi nếu không có.
-    const post = this.posts.find((p) => p.id === id);
+  async findOne(id: number): Promise<Post> {
+    const post = await this.postsRepository.findOneBy({ id });
+
     if (!post) {
-      throw new NotFoundException(`Post #${id} not found`);
+      throw new NotFoundException('Post not found!');
     }
+
     return post;
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    // Cập nhật bài viết hiện có theo id.
-    const index = this.posts.findIndex((p) => p.id === id);
-    if (index === -1) {
-      throw new NotFoundException(`Post #${id} not found`);
-    }
-    this.posts[index] = { ...this.posts[index], ...updatePostDto };
-    return this.posts[index];
+  create(createPostDto: CreatePostDto): Promise<Post> {
+    const post = this.postsRepository.create(createPostDto);
+    return this.postsRepository.save(post);
   }
 
-  remove(id: number) {
-    // Xóa bài viết khỏi mảng dữ liệu tạm.
-    const index = this.posts.findIndex((p) => p.id === id);
-    if (index === -1) {
-      throw new NotFoundException(`Post #${id} not found`);
+  async update(id: number, updatePostDto: UpdatePostDto): Promise<Post> {
+    const post = await this.findOne(id);
+
+    const updatedPost = Object.assign({}, post, updatePostDto);
+
+    return this.postsRepository.save(updatedPost);
+  }
+
+  async remove(id: number): Promise<void> {
+    const post = await this.postsRepository.findOneBy({ id });
+
+    if (!post) {
+      throw new NotFoundException('Post not found!');
     }
-    const deletedPost = this.posts.splice(index, 1);
-    return deletedPost;
+
+    await this.postsRepository.delete(id);
   }
 }

@@ -1,18 +1,12 @@
 import { Module } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { PostsController } from './posts.controller';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Post } from './entities/post.entity';
 
-const mockPostsService = {
-  findAll: () => [{ id: 1, title: 'Mock', content: 'Demo' }],
-}
 @Module({
-  // Đăng ký controller và service cho PostsModule.
+  imports: [TypeOrmModule.forFeature([Post])],
   controllers: [PostsController],
-  providers: [
-    {
-      provide: PostsService,
-      useValue: mockPostsService,
-    },
-  ],
+  providers: [PostsService],
 })
 export class PostsModule {}

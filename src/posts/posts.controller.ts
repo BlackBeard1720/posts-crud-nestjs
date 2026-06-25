@@ -7,10 +7,12 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { PostsService } from './posts.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { QueryPostDto } from './dto/query-post.dto';
 
 @Controller('posts')
 export class PostsController {
@@ -24,8 +26,8 @@ export class PostsController {
 
   // Lấy danh sách tất cả bài viết.
   @Get()
-  findAll() {
-    return this.postsService.findAll();
+  findAll(@Query() query: QueryPostDto) {
+    return this.postsService.findAll(query);
   }
 
   // Lấy một bài viết theo id.
