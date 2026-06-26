@@ -4,8 +4,10 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
 } from 'typeorm';
 import { PostStatus } from '../enums/post-status.enum';
+import { User } from 'src/users/entities/user.entity';
 
 @Entity()
 export class Post {
@@ -30,4 +32,9 @@ export class Post {
 
   @UpdateDateColumn()
   updatedAt!: Date;
+
+  @ManyToOne(() => User, (user) => user.posts, {
+    nullable: false,
+  })
+  user!: User;
 }
