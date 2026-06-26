@@ -22,9 +22,8 @@ export class PostsService {
     const sortBy = query.sortBy ?? 'createdAt';
     const sortOrder = query.sortOrder ?? 'DESC';
 
-    const qb = this.postsRepository.createQueryBuilder('post');
-
-    qb.where('1 = 1');
+    const qb = this.postsRepository.createQueryBuilder('post')
+    .leftJoinAndSelect('post.user', 'user');
 
     if (query.status) {
       qb.andWhere('post.status = :status', {
@@ -60,7 +59,12 @@ export class PostsService {
   }
 
   async findOne(id: number): Promise<Post> {
-    const post = await this.postsRepository.findOneBy({ id });
+    const post = await this.postsRepository.findOne({
+      where: { id },
+      relations: {
+        user: true,
+      }
+    });
 
     if (!post) {
       throw new NotFoundException('Post not found!');
