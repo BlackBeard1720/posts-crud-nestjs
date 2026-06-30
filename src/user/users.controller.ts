@@ -8,9 +8,9 @@ import {
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
-import { CreatePostDto } from 'src/posts/dto/create-post.dto';
+import { CreatePostDto } from 'src/post/dto/create-post.dto';
 import { User } from './entities/user.entity';
-import { Post as PostEntity } from 'src/posts/entities/post.entity';
+import { Post as PostEntity } from 'src/post/entities/post.entity';
 
 @Controller('users')
 export class UsersController {

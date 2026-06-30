@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Not, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Post } from 'src/posts/entities/post.entity';
-import { CreatePostDto } from 'src/posts/dto/create-post.dto';
+import { Post } from 'src/post/entities/post.entity';
+import { CreatePostDto } from 'src/post/dto/create-post.dto';
 
 @Injectable()
 export class UsersService {
@@ -25,7 +25,7 @@ export class UsersService {
       where: { id },
       relations: {
         posts: true,
-      }
+      },
     });
 
     if (!user) {

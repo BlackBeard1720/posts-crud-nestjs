@@ -22,8 +22,9 @@ export class PostsService {
     const sortBy = query.sortBy ?? 'createdAt';
     const sortOrder = query.sortOrder ?? 'DESC';
 
-    const qb = this.postsRepository.createQueryBuilder('post')
-    .leftJoinAndSelect('post.user', 'user');
+    const qb = this.postsRepository
+      .createQueryBuilder('post')
+      .leftJoinAndSelect('post.user', 'user');
 
     if (query.status) {
       qb.andWhere('post.status = :status', {
@@ -63,7 +64,7 @@ export class PostsService {
       where: { id },
       relations: {
         user: true,
-      }
+      },
     });
 
     if (!post) {
