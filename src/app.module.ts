@@ -9,7 +9,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UsersModule } from './user/users.module';
 import { CategoryModule } from './category/category.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { QueryFailedFilter } from './common/filters/query-failed.filter';
 import { APP_FILTER } from '@nestjs/core';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -38,6 +40,7 @@ import { APP_FILTER } from '@nestjs/core';
     PostsModule,
     UsersModule,
     CategoryModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -45,7 +48,11 @@ import { APP_FILTER } from '@nestjs/core';
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
-    }
+    },
+    {
+      provide: APP_FILTER,
+      useClass: QueryFailedFilter,
+    },
   ],
 })
 export class AppModule implements NestModule {

@@ -6,8 +6,15 @@ export class User {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column()
+  @Column({
+    unique: true,
+  })
   username!: string;
+
+  @Column({
+    select: false,
+  })
+  password!: string;
 
   @Column({ default: true })
   isActive!: boolean;

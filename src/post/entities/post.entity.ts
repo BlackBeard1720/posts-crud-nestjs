@@ -43,7 +43,7 @@ export class Post {
 
   @ManyToMany(() => Category, (category) => category.posts)
   @JoinTable({
-    name: 'post_category'
+    name: 'post_category',
   })
   categories!: Category[];
 }

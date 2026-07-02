@@ -5,6 +5,7 @@ import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Post } from 'src/post/entities/post.entity';
 import { CreatePostDto } from 'src/post/dto/create-post.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UsersService {
@@ -35,9 +36,26 @@ export class UsersService {
     return user;
   }
 
-  create(createUserDto: CreateUserDto): Promise<User> {
-    const user = this.usersRepository.create(createUserDto);
-    return this.usersRepository.save(user);
+  async findOneForAuth(username: string): Promise<User | null> {
+    return this.usersRepository
+      .createQueryBuilder('user')
+      .addSelect('user.password')
+      .where('user.username = :username', { username })
+      .getOne();
+  }
+
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    const passwordHash = await bcrypt.hash(createUserDto.password, 10);
+    const user = this.usersRepository.create({
+      ...createUserDto,
+      password: passwordHash,
+    });
+
+    const savedUser = await this.usersRepository.save(user);
+
+    return this.usersRepository.findOneByOrFail({
+      id: savedUser.id,
+    });
   }
 
   async createPost(
